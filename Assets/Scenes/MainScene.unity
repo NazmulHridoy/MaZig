@@ -206,7 +206,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 248240027}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: RestartGame
         m_Mode: 1
@@ -686,6 +686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 248240026}
+  - component: {fileID: 248240027}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -708,6 +709,40 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &248240027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 248240023}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 860e682b8279c51448c3cb604a5498eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameSettings: {fileID: 11400000, guid: f177cbfb43334514a827712857571536, type: 2}
+  gridLayoutSettings: {fileID: 11400000, guid: 4d2efa2e204ba134a87f54de02affd02, type: 2}
+  flipBackDelay: 1
+  cardFlipDuration: 0.3
+  previewDuration: 3
+  cardPrefab: {fileID: 8465837538084975078, guid: 1e58b2b3b8158ca47ba02c85f8ddc1c8, type: 3}
+  cardContainer: {fileID: 1931839211}
+  playArea: {fileID: 527828799}
+  cardFaces: []
+  cardBack: {fileID: 0}
+  availableThemes:
+  - {fileID: 11400000, guid: ac0329cc38c9ccf4b9a001a6d0b5059e, type: 2}
+  currentThemeIndex: 0
+  scoreText: {fileID: 1409370216}
+  movesText: {fileID: 104694554}
+  timerText: {fileID: 1057577889}
+  winPanel: {fileID: 1243631893}
+  finalScoreText: {fileID: 1325844712}
+  finalMovesText: {fileID: 2071937307}
+  finalTimeText: {fileID: 2059129003}
+  layoutDropdown: {fileID: 300017961}
+  themeDropdown: {fileID: 829684864}
 --- !u!1 &261489364
 GameObject:
   m_ObjectHideFlags: 0
@@ -3639,7 +3674,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 248240027}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
         m_MethodName: RestartGame
         m_Mode: 1
@@ -3775,6 +3810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1891029778}
   - component: {fileID: 1891029779}
+  - component: {fileID: 1891029780}
   m_Layer: 0
   m_Name: AudioManager
   m_TagString: Untagged
@@ -3893,6 +3929,26 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &1891029780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1891029776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c84c558190ec6724eb517a5757ca8a2c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  effectsSource: {fileID: 0}
+  musicSource: {fileID: 0}
+  cardFlipSound: {fileID: 0}
+  matchSound: {fileID: 0}
+  mismatchSound: {fileID: 0}
+  gameOverSound: {fileID: 0}
+  effectsVolume: 1
+  musicVolume: 0.5
 --- !u!1 &1914387303
 GameObject:
   m_ObjectHideFlags: 0

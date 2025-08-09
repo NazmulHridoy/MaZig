@@ -1,0 +1,90 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e55d774bf9415f048a478bac5a5d38b9, type: 3}
+  m_Name: DefaultGridSettings
+  m_EditorClassIdentifier: 
+  minCardSize: 30
+  maxCardSize: 600
+  gridPresets:
+  - name: 2x2
+    rows: 2
+    columns: 2
+    cardSize: 500
+    cardSizeMultiplier: 1
+    cardSpacing: 100
+    horizontalPadding: 50
+    verticalPadding: 50
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 2x3
+    rows: 2
+    columns: 3
+    cardSize: 450
+    cardSizeMultiplier: 1
+    cardSpacing: 80
+    horizontalPadding: 40
+    verticalPadding: 40
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 3x4
+    rows: 3
+    columns: 4
+    cardSize: 400
+    cardSizeMultiplier: 1
+    cardSpacing: 60
+    horizontalPadding: 30
+    verticalPadding: 30
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 4x4
+    rows: 4
+    columns: 4
+    cardSize: 350
+    cardSizeMultiplier: 1
+    cardSpacing: 50
+    horizontalPadding: 25
+    verticalPadding: 25
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 4x5
+    rows: 4
+    columns: 5
+    cardSize: 300
+    cardSizeMultiplier: 1
+    cardSpacing: 40
+    horizontalPadding: 20
+    verticalPadding: 20
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 5x6
+    rows: 5
+    columns: 6
+    cardSize: 200
+    cardSizeMultiplier: 1
+    cardSpacing: 30
+    horizontalPadding: 15
+    verticalPadding: 15
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  - name: 6x6
+    rows: 6
+    columns: 6
+    cardSize: 150
+    cardSizeMultiplier: 1
+    cardSpacing: 20
+    horizontalPadding: 10
+    verticalPadding: 10
+    useAutomaticSizing: 1
+    maintainAspectRatio: 1
+  defaultFlipDuration: 0.3
+  defaultFlipBackDelay: 1
+  defaultPreviewDuration: 3
