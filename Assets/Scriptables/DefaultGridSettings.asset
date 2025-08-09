@@ -18,51 +18,51 @@ MonoBehaviour:
   - name: 2x2
     rows: 2
     columns: 2
-    cardSize: 500
+    cardSize: 400
     cardSizeMultiplier: 1
     cardSpacing: 100
-    horizontalPadding: 50
-    verticalPadding: 50
+    horizontalPadding: 100
+    verticalPadding: 100
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 2x3
     rows: 2
     columns: 3
-    cardSize: 450
+    cardSize: 400
     cardSizeMultiplier: 1
     cardSpacing: 80
-    horizontalPadding: 40
-    verticalPadding: 40
+    horizontalPadding: 80
+    verticalPadding: 80
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 3x4
     rows: 3
     columns: 4
-    cardSize: 400
+    cardSize: 350
     cardSizeMultiplier: 1
     cardSpacing: 60
-    horizontalPadding: 30
-    verticalPadding: 30
+    horizontalPadding: 60
+    verticalPadding: 60
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 4x4
     rows: 4
     columns: 4
-    cardSize: 350
+    cardSize: 300
     cardSizeMultiplier: 1
     cardSpacing: 50
-    horizontalPadding: 25
-    verticalPadding: 25
+    horizontalPadding: 50
+    verticalPadding: 50
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 4x5
     rows: 4
     columns: 5
-    cardSize: 300
+    cardSize: 250
     cardSizeMultiplier: 1
     cardSpacing: 40
-    horizontalPadding: 20
-    verticalPadding: 20
+    horizontalPadding: 40
+    verticalPadding: 40
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 5x6
@@ -71,8 +71,8 @@ MonoBehaviour:
     cardSize: 200
     cardSizeMultiplier: 1
     cardSpacing: 30
-    horizontalPadding: 15
-    verticalPadding: 15
+    horizontalPadding: 30
+    verticalPadding: 30
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   - name: 6x6
@@ -81,10 +81,10 @@ MonoBehaviour:
     cardSize: 150
     cardSizeMultiplier: 1
     cardSpacing: 20
-    horizontalPadding: 10
-    verticalPadding: 10
+    horizontalPadding: 20
+    verticalPadding: 20
     useAutomaticSizing: 1
     maintainAspectRatio: 1
   defaultFlipDuration: 0.3
-  defaultFlipBackDelay: 1
-  defaultPreviewDuration: 3
+  defaultFlipBackDelay: 0.5
+  defaultPreviewDuration: 2

@@ -27,5 +27,5 @@ MonoBehaviour:
   - {fileID: 148823468, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
   - {fileID: -790410561, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
   - {fileID: 1045870009, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
-  cardBack: {fileID: -640280188, guid: 68cc9e83a4a4d6f41b126377282374af, type: 3}
+  cardBack: {fileID: 21300000, guid: 0d298e5551999254784b36caffc0b989, type: 3}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}

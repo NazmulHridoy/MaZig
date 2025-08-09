@@ -45,5 +45,5 @@ MonoBehaviour:
   - {fileID: 260009632, guid: f39f002d94286c14592ed0003e8b59bb, type: 3}
   - {fileID: -1835996959, guid: f39f002d94286c14592ed0003e8b59bb, type: 3}
   - {fileID: -1778800520, guid: f39f002d94286c14592ed0003e8b59bb, type: 3}
-  cardBack: {fileID: 1227595040, guid: 68cc9e83a4a4d6f41b126377282374af, type: 3}
+  cardBack: {fileID: 21300000, guid: 0d298e5551999254784b36caffc0b989, type: 3}
   backgroundColor: {r: 1, g: 1, b: 1, a: 1}
