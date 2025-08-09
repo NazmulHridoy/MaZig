@@ -734,8 +734,9 @@ MonoBehaviour:
   cardFaces: []
   cardBack: {fileID: 0}
   availableThemes:
-  - {fileID: 11400000, guid: ac0329cc38c9ccf4b9a001a6d0b5059e, type: 2}
-  - {fileID: 11400000, guid: b4cd29375856f324cb15f8f118eaed25, type: 2}
+  - {fileID: 11400000, guid: f62edc8ca3516e34ca9472ad0b074238, type: 2}
+  - {fileID: 11400000, guid: 3472fb8565644cb46a678019fcea2a79, type: 2}
+  - {fileID: 11400000, guid: 13ad6fcf93d7e604f849e3529cc02f2a, type: 2}
   currentThemeIndex: 1
   scoreText: {fileID: 1409370216}
   movesText: {fileID: 104694554}
@@ -1287,7 +1288,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.9404325, b: 0.21226418, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1

@@ -70,7 +70,7 @@ public class HomeManager : MonoBehaviour
             gridSizeDropdown.ClearOptions();
             List<string> gridOptions = new List<string>
             {
-                "2x2", "2x3", "3x4", "4x4", "4x5", "5x5", "5x6", "6x6"
+                "2x2", "2x3", "3x4", "4x4", "4x5", "5x6", "6x6"
             };
             gridSizeDropdown.AddOptions(gridOptions);
             

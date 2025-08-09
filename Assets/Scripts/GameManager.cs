@@ -158,7 +158,7 @@ public class GameManager : MonoBehaviour
             layoutDropdown.ClearOptions();
             List<string> options = new List<string>
             {
-                "2x2", "2x3", "3x4", "4x4", "4x5", "5x5", "5x6", "6x6"
+                "2x2", "2x3", "3x4", "4x4", "4x5", "5x6", "6x6"
             };
             layoutDropdown.AddOptions(options);
             layoutDropdown.onValueChanged.AddListener(OnLayoutChanged);
@@ -309,6 +309,7 @@ public class GameManager : MonoBehaviour
 
     public void StartNewGame()
     {
+        gameActive = false; // Ensure game is inactive during setup
         ClearBoard();
         SetupBoard();
         ResetGameStats();
@@ -503,6 +504,31 @@ public class GameManager : MonoBehaviour
         foreach (Card card in allCards)
         {
             card.HidePreview();
+        }
+
+        yield return new WaitForSeconds(cardFlipDuration);
+
+        gameActive = true;
+    }
+    
+    private IEnumerator ShowLoadedGamePreview()
+    {
+        foreach (Card card in allCards)
+        {
+            if (!card.IsMatched)
+            {
+                card.ShowPreview();
+            }
+        }
+        
+        yield return new WaitForSeconds(previewDuration);
+        
+        foreach (Card card in allCards)
+        {
+            if (!card.IsMatched && !card.IsFlipped)
+            {
+                card.HidePreview();
+            }
         }
 
         yield return new WaitForSeconds(cardFlipDuration);
@@ -710,7 +736,8 @@ public class GameManager : MonoBehaviour
                     }
                 }
 
-                gameActive = true;
+                gameActive = false;
+                StartCoroutine(ShowLoadedGamePreview());
             }
             else
             {

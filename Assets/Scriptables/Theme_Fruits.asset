@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7c6488d7f698d42a6fcf28669b56cd, type: 3}
+  m_Name: Theme_Fruits
+  m_EditorClassIdentifier: 
+  themeName: Fruits
+  description: A collection of Fruits
+  cardFaces:
+  - {fileID: -2658940, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: 381659353, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -442115376, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -1654924064, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -378434167, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -427741468, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -331731826, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: 1327209023, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -108956166, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: 148823468, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: -790410561, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  - {fileID: 1045870009, guid: 69d470599b701e640b21969a7271a4aa, type: 3}
+  cardBack: {fileID: -640280188, guid: 68cc9e83a4a4d6f41b126377282374af, type: 3}
+  backgroundColor: {r: 1, g: 1, b: 1, a: 1}
