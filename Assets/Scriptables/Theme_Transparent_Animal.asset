@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d7c6488d7f698d42a6fcf28669b56cd, type: 3}
+  m_Name: Theme_Transparent_Animal
+  m_EditorClassIdentifier: 
+  themeName: Animal Transparent
+  description: Animal Transparent wiothout background
+  cardFaces:
+  - {fileID: 21300000, guid: 30f458335382e2e4c9b906945804053f, type: 3}
+  - {fileID: 21300000, guid: e473d1d33e118ff4da22e3b7e8ba8685, type: 3}
+  - {fileID: 21300000, guid: a4c83c430df46cd4e939bdd869e5277b, type: 3}
+  - {fileID: 21300000, guid: 3c5e63c9d802b9448b209d1cd787450a, type: 3}
+  - {fileID: 21300000, guid: 030a3c44b26c4c349b8981bb7c51c69c, type: 3}
+  - {fileID: 21300000, guid: 5e0f0bc3d84501a46bfd428c4a3b3e93, type: 3}
+  - {fileID: 21300000, guid: 8526032b1c084ca428cf2b0e89719df1, type: 3}
+  - {fileID: 21300000, guid: 6d7e5ca003e62f04f87a18d482f4aa5d, type: 3}
+  - {fileID: 21300000, guid: 0eff0846d9d36354693e9dd3340ff0c9, type: 3}
+  - {fileID: 21300000, guid: 5c0888136538c5249b0b5c71689710f8, type: 3}
+  - {fileID: 21300000, guid: 85a69141a3c50fa49b0b33b1be613d9e, type: 3}
+  - {fileID: 21300000, guid: dbd5c291b2ac25049bf2a3c37fcdb351, type: 3}
+  cardBack: {fileID: -1637737105, guid: 68cc9e83a4a4d6f41b126377282374af, type: 3}
+  backgroundColor: {r: 0, g: 0.71511394, b: 0.9811321, a: 1}
