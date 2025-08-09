@@ -68,7 +68,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -89,18 +88,60 @@ public class GameManager : MonoBehaviour
     
     private IEnumerator DelayedStart()
     {
-        yield return null;
-        
+        yield return new WaitForEndOfFrame();
+
         if (playArea != null)
         {
             Canvas.ForceUpdateCanvases();
-        }        
-        LoadGame();
+            
+            UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(playArea);
+            
+            yield return null;
+            
+            float maxAttempts = 3;
+            float attempts = 0;
+            
+            while ((playArea.rect.width <= 0 || playArea.rect.height <= 0) && attempts < maxAttempts)
+            {
+                Debug.LogWarning($"Waiting for valid play area dimensions... Attempt {attempts + 1}");
+                yield return new WaitForEndOfFrame();
+                Canvas.ForceUpdateCanvases();
+                UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(playArea);
+                attempts++;
+            }
+            
+            if (playArea.rect.width > 0 && playArea.rect.height > 0)
+            {
+                Debug.Log($"Play area initialized with dimensions: {playArea.rect.width}x{playArea.rect.height}");
+            }
+            else
+            {
+                Debug.LogError("Failed to get valid play area dimensions after multiple attempts");
+            }
+        }
+        
+        // Check if we should load save or start new game based on home scene preferences
+        bool shouldLoadSave = PlayerPrefs.GetInt("LoadSaveOnStart", 0) == 1;
+        PlayerPrefs.DeleteKey("LoadSaveOnStart"); // Clear after reading
+        
+        if (shouldLoadSave && saveSystem.HasSaveData())
+        {
+            LoadGame();
+        }
+        else
+        {
+            // Get game preferences from home scene
+            currentRows = PlayerPrefs.GetInt("SelectedRows", 2);
+            currentColumns = PlayerPrefs.GetInt("SelectedColumns", 2);
+            currentThemeIndex = PlayerPrefs.GetInt("SelectedTheme", 0);
+            
+            // Update dropdowns to match selected values
+            UpdateDropdownsToSelection();
+            
+            StartNewGame();
+        }
     }
 
-    /// <summary>
-    /// Updates game timer every frame while game is active
-    /// </summary>
     private void Update()
     {
         if (gameActive)
@@ -195,6 +236,30 @@ public class GameManager : MonoBehaviour
             {
                 Camera.main.backgroundColor = currentTheme.backgroundColor;
             }
+        }
+    }
+    
+    private void UpdateDropdownsToSelection()
+    {
+        // Update layout dropdown
+        if (layoutDropdown != null)
+        {
+            string selectedLayout = $"{currentRows}x{currentColumns}";
+            for (int i = 0; i < layoutDropdown.options.Count; i++)
+            {
+                if (layoutDropdown.options[i].text == selectedLayout)
+                {
+                    layoutDropdown.SetValueWithoutNotify(i);
+                    break;
+                }
+            }
+        }
+        
+        // Update theme dropdown and apply theme
+        if (themeDropdown != null && currentThemeIndex >= 0 && currentThemeIndex < themeDropdown.options.Count)
+        {
+            themeDropdown.SetValueWithoutNotify(currentThemeIndex);
+            SetCurrentTheme(currentThemeIndex);
         }
     }
     
@@ -704,6 +769,15 @@ public class GameManager : MonoBehaviour
         #else
             Application.Quit();
         #endif
+    }
+    
+    public void ReturnToHome()
+    {
+        if (gameActive)
+        {
+            SaveGame(); // Auto-save current game
+        }
+        SceneController.LoadHomeScene();
     }
 
     private void OnApplicationPause(bool pauseStatus)
