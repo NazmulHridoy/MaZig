@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float flipBackDelay = 1f;
     [SerializeField] private float cardFlipDuration = 0.3f;
     [SerializeField] private float previewDuration = 3f;
+    [SerializeField] private float winPanelDelay = 1.5f;
     
     
     private GridLayoutSettings.GridSizePreset currentGridPreset;
@@ -43,12 +44,20 @@ public class GameManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI finalTimeText;
     [SerializeField] private TMP_Dropdown layoutDropdown;
     [SerializeField] private TMP_Dropdown themeDropdown;
+    
+    [Header("Combo UI")]
+    [SerializeField] private TextMeshProUGUI comboText;
+    [SerializeField] private CanvasGroup comboCanvasGroup;
+    [SerializeField] private float comboFadeInDuration = 0.3f;
+    [SerializeField] private float comboDisplayDuration = 1.5f;
+    [SerializeField] private float comboFadeOutDuration = 0.5f;
 
     // Game state variables
     private List<Card> flippedCards = new List<Card>();
     private List<Card> allCards = new List<Card>();
     private int score = 0;
     private int moves = 0;
+    private int clickCount = 0;
     private float gameTime = 0f;
     private bool gameActive = false;
     private int totalPairs;
@@ -56,6 +65,13 @@ public class GameManager : MonoBehaviour
     private int currentRows = 2;
     private int currentColumns = 2;
     private bool isCheckingMatches = false;
+    
+    // Combo system variables
+    private int comboCount = 0;
+    private int lastMatchMove = -1;
+    private const int baseScore = 10;
+    private const int comboBonus = 5;
+    private Coroutine comboDisplayCoroutine;
 
     // System references
     private SaveSystem saveSystem;
@@ -68,6 +84,11 @@ public class GameManager : MonoBehaviour
         
         // SetupLayoutDropdown();
         // SetupThemeDropdown();
+        
+        if (comboCanvasGroup != null)
+        {
+            comboCanvasGroup.alpha = 0f;
+        }
 
         StartCoroutine(DelayedStart());
     }
@@ -326,7 +347,7 @@ public class GameManager : MonoBehaviour
 
     public void StartNewGame()
     {
-        gameActive = false; // Ensure game is inactive during setup
+        gameActive = false;
         ClearBoard();
         SetupBoard();
         ResetGameStats();
@@ -596,9 +617,13 @@ public class GameManager : MonoBehaviour
 
         clickedCard.Flip();
         flippedCards.Add(clickedCard);
-        
-        moves++;
-        UpdateMovesDisplay();
+
+        clickCount++;
+        if (clickCount % 2 == 0)
+        {
+            moves++;
+            UpdateMovesDisplay();
+        }
 
         if (audioManager != null)
             audioManager.PlayCardFlip();
@@ -628,7 +653,25 @@ public class GameManager : MonoBehaviour
         {
             cardsToCheck[0].SetMatched();
             cardsToCheck[1].SetMatched();
-            score += 10;
+            
+            // Calculate score with combo system
+            int matchScore = baseScore;
+            
+            // Check if this is a combo (match within 2 moves of the last match)
+            if (lastMatchMove >= 0 && moves - lastMatchMove <= 2)
+            {
+                comboCount++;
+                matchScore += comboBonus * comboCount;
+                Debug.Log($"Combo x{comboCount}! Bonus: {comboBonus * comboCount} points");
+                ShowComboFeedback(comboCount);
+            }
+            else
+            {
+                comboCount = 0;
+            }
+            
+            score += matchScore;
+            lastMatchMove = moves;
             matchedPairs++;
             
             if (audioManager != null)
@@ -643,6 +686,9 @@ public class GameManager : MonoBehaviour
         }
         else
         {
+            // Reset combo on mismatch
+            comboCount = 0;
+            
             if (audioManager != null)
                 audioManager.PlayMismatch();
                 
@@ -665,10 +711,19 @@ public class GameManager : MonoBehaviour
     private void GameWon()
     {
         gameActive = false;
-        
+        StartCoroutine(ShowWinPanelWithDelay());
+    }
+    
+    private IEnumerator ShowWinPanelWithDelay()
+    {
+        // Play game over sound immediately
         if (audioManager != null)
             audioManager.PlayGameOver();
         
+        // Wait for the specified delay
+        yield return new WaitForSeconds(winPanelDelay);
+        
+        // Show the win panel
         if (winPanel != null)
         {
             winPanel.SetActive(true);
@@ -689,10 +744,15 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         moves = 0;
+        clickCount = 0; // Reset click count when starting new game
         gameTime = 0f;
         matchedPairs = 0;
         flippedCards.Clear();
         isCheckingMatches = false;
+        
+        // Reset combo variables
+        comboCount = 0;
+        lastMatchMove = -1;
 
         UpdateScoreDisplay();
         UpdateMovesDisplay();
@@ -732,12 +792,15 @@ public class GameManager : MonoBehaviour
             {
                 score = score,
                 moves = moves,
+                clickCount = clickCount,
                 gameTime = gameTime,
                 matchedPairs = matchedPairs,
                 totalPairs = totalPairs,
                 rows = currentRows,
                 columns = currentColumns,
                 themeIndex = currentThemeIndex,
+                comboCount = comboCount,
+                lastMatchMove = lastMatchMove,
                 cardStates = new List<CardState>()
             };
 
@@ -780,9 +843,12 @@ public class GameManager : MonoBehaviour
                 
                 score = data.score;
                 moves = data.moves;
+                clickCount = data.clickCount;
                 gameTime = data.gameTime;
                 matchedPairs = data.matchedPairs;
                 totalPairs = data.totalPairs;
+                comboCount = data.comboCount;
+                lastMatchMove = data.lastMatchMove;
                 
                 Debug.Log($"LoadGame: Restored theme index {currentThemeIndex}");
 
@@ -916,5 +982,79 @@ public class GameManager : MonoBehaviour
         {
             SaveGame();
         }
+    }
+    
+    private void ShowComboFeedback(int combo)
+    {
+        if (comboText == null || comboCanvasGroup == null)
+            return;
+
+        if (comboDisplayCoroutine != null)
+        {
+            StopCoroutine(comboDisplayCoroutine);
+        }
+        
+        comboDisplayCoroutine = StartCoroutine(DisplayComboAnimation(combo));
+    }
+    
+    private IEnumerator DisplayComboAnimation(int combo)
+    {
+        string comboMessage = "";
+        if (combo <= 2)
+        {
+            comboMessage = $"COMBO x{combo}!";
+        }
+        else if (combo <= 4)
+        {
+            comboMessage = $"SUPER COMBO x{combo}!";
+        }
+        else if (combo <= 6)
+        {
+            comboMessage = $"MEGA COMBO x{combo}!";
+        }
+        else
+        {
+            comboMessage = $"UNSTOPPABLE x{combo}!";
+        }
+        
+        comboText.text = comboMessage;
+
+        comboText.transform.localScale = Vector3.zero;
+
+        float elapsedTime = 0;
+        while (elapsedTime < comboFadeInDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / comboFadeInDuration;
+            
+            // Ease out cubic for smooth animation
+            float easedProgress = 1f - Mathf.Pow(1f - progress, 3f);
+            
+            comboCanvasGroup.alpha = easedProgress;
+            comboText.transform.localScale = Vector3.one * (0.5f + easedProgress * 0.5f);
+            
+            yield return null;
+        }
+        
+        comboCanvasGroup.alpha = 1f;
+        comboText.transform.localScale = Vector3.one;
+
+        yield return new WaitForSeconds(comboDisplayDuration);
+        
+        // Fade out
+        elapsedTime = 0;
+        while (elapsedTime < comboFadeOutDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / comboFadeOutDuration;
+            
+            comboCanvasGroup.alpha = 1f - progress;
+            comboText.transform.localScale = Vector3.one * (1f + progress * 0.2f);
+            
+            yield return null;
+        }
+        
+        comboCanvasGroup.alpha = 0f;
+        comboDisplayCoroutine = null;
     }
 }

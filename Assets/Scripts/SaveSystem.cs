@@ -16,6 +16,7 @@ public class GameData
 {
     public int score;
     public int moves;
+    public int clickCount;
     public float gameTime;
     public int matchedPairs;
     public int totalPairs;
@@ -24,6 +25,10 @@ public class GameData
     public int themeIndex;
     public List<CardState> cardStates;
     public string saveDate;
+    
+    // Combo system data
+    public int comboCount;
+    public int lastMatchMove;
 }
 
 public class SaveSystem : MonoBehaviour
