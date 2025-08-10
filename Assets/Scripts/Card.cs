@@ -61,6 +61,8 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
         cardImage.sprite = cardFaceSprite;
         cardBackImage.sprite = cardBackSprite;
+
+        gameManager = GameManager.Instance;
         
         ShowFace();
         ResetCard();
@@ -97,17 +99,9 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isAnimating && !isMatched)
+        if (!isAnimating && !isMatched && gameManager != null)
         {
-            if (gameManager == null)
-            {
-                gameManager = FindObjectOfType<GameManager>();
-            }
-            
-            if (gameManager != null)
-            {
-                gameManager.CardClicked(this);
-            }
+            gameManager.CardClicked(this);
         }
     }
 
@@ -242,5 +236,15 @@ public class Card : MonoBehaviour, IPointerClickHandler
         transform.localEulerAngles = Vector3.zero;
         
         ShowBack();
+    }
+    
+    public void ResetForPool()
+    {
+        StopAllCoroutines();
+        ResetCard();
+        gameManager = null;
+        cardValue = -1;
+        cardFaceSprite = null;
+        cardBackSprite = null;
     }
 }

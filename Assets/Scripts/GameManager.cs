@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private RectTransform playArea;
     [SerializeField] private Sprite[] cardFaces;
     [SerializeField] private Sprite cardBack;
+    [SerializeField] private CardPool cardPool;
     
     [Header("Sprite Themes")]
     [SerializeField] private SpriteTheme[] availableThemes;
@@ -51,6 +52,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float comboFadeInDuration = 0.3f;
     [SerializeField] private float comboDisplayDuration = 1.5f;
     [SerializeField] private float comboFadeOutDuration = 0.5f;
+    
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject pauseMenuPanel;
+    [SerializeField] private Button pauseButton;
+    [SerializeField] private UnityEngine.UI.Slider masterVolumeSlider;
+    [SerializeField] private UnityEngine.UI.Slider sfxVolumeSlider;
+    [SerializeField] private UnityEngine.UI.Slider musicVolumeSlider;
+    [SerializeField] private TextMeshProUGUI masterVolumeText;
+    [SerializeField] private TextMeshProUGUI sfxVolumeText;
+    [SerializeField] private TextMeshProUGUI musicVolumeText;
 
     // Game state variables
     private List<Card> flippedCards = new List<Card>();
@@ -72,15 +83,34 @@ public class GameManager : MonoBehaviour
     private const int baseScore = 10;
     private const int comboBonus = 5;
     private Coroutine comboDisplayCoroutine;
+    
+    // Timer optimization
+    private int lastDisplayedSeconds = -1;
+    private int timerUpdateCount = 0;
+    
+    // Pause state
+    private bool isPaused = false;
 
     // System references
     private SaveSystem saveSystem;
     private AudioManager audioManager;
+    
+    public static GameManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {       
         saveSystem = SaveSystem.Instance;
         audioManager = AudioManager.Instance;
+        
+        if (cardPool != null && cardPrefab != null)
+        {
+            cardPool.SetCardPrefab(cardPrefab);
+        }
         
         // SetupLayoutDropdown();
         // SetupThemeDropdown();
@@ -89,6 +119,9 @@ public class GameManager : MonoBehaviour
         {
             comboCanvasGroup.alpha = 0f;
         }
+        
+        // Initialize pause menu
+        InitializePauseMenu();
 
         StartCoroutine(DelayedStart());
     }
@@ -110,7 +143,6 @@ public class GameManager : MonoBehaviour
             
             while ((playArea.rect.width <= 0 || playArea.rect.height <= 0) && attempts < maxAttempts)
             {
-                Debug.LogWarning($"Waiting for valid play area dimensions... Attempt {attempts + 1}");
                 yield return new WaitForEndOfFrame();
                 Canvas.ForceUpdateCanvases();
                 UnityEngine.UI.LayoutRebuilder.ForceRebuildLayoutImmediate(playArea);
@@ -171,7 +203,14 @@ public class GameManager : MonoBehaviour
         if (gameActive)
         {
             gameTime += Time.deltaTime;
-            UpdateTimerDisplay();
+            
+            int currentSeconds = Mathf.FloorToInt(gameTime);
+            if (currentSeconds != lastDisplayedSeconds)
+            {
+                lastDisplayedSeconds = currentSeconds;
+                timerUpdateCount++;
+                UpdateTimerDisplay();
+            }
         }
     }
 
@@ -358,10 +397,23 @@ public class GameManager : MonoBehaviour
 
     private void ClearBoard()
     {
-        foreach (Card card in allCards)
+        if (cardPool != null)
         {
-            if (card != null)
-                Destroy(card.gameObject);
+            foreach (Card card in allCards)
+            {
+                if (card != null)
+                {
+                    cardPool.ReturnCard(card);
+                }
+            }
+        }
+        else
+        {
+            foreach (Card card in allCards)
+            {
+                if (card != null)
+                    Destroy(card.gameObject);
+            }
         }
         allCards.Clear();
         flippedCards.Clear();
@@ -513,14 +565,27 @@ public class GameManager : MonoBehaviour
 
     private void CreateCard(int row, int col, int cardValue)
     {
-        Debug.Log($"Creating card at row={row}, col={col}, value={cardValue}");
         
-        GameObject newCard = Instantiate(cardPrefab, cardContainer);
-        Card cardComponent = newCard.GetComponent<Card>();
+        Card cardComponent = null;
+
+        if (cardPool != null)
+        {
+            cardComponent = cardPool.GetCard();
+            if (cardComponent != null)
+            {
+                cardComponent.transform.SetParent(cardContainer);
+            }
+        }
+        
+        if (cardComponent == null)
+        {
+            GameObject newCard = Instantiate(cardPrefab, cardContainer);
+            cardComponent = newCard.GetComponent<Card>();
+        }
         
         if (cardComponent != null)
         {
-            RectTransform rectTransform = newCard.GetComponent<RectTransform>();
+            RectTransform rectTransform = cardComponent.GetComponent<RectTransform>();
             rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
             rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
             rectTransform.pivot = new Vector2(0.5f, 0.5f);
@@ -546,7 +611,6 @@ public class GameManager : MonoBehaviour
             cardComponent.Initialize(cardValue, cardFace, cardBackSprite, cardFlipDuration);
             allCards.Add(cardComponent);
             
-            Debug.Log($"Card created at position {rectTransform.anchoredPosition}, size: {calculatedCardSize}");
         }
         else
         {
@@ -657,7 +721,6 @@ public class GameManager : MonoBehaviour
             // Calculate score with combo system
             int matchScore = baseScore;
             
-            // Check if this is a combo (match within 2 moves of the last match)
             if (lastMatchMove >= 0 && moves - lastMatchMove <= 2)
             {
                 comboCount++;
@@ -686,7 +749,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Reset combo on mismatch
             comboCount = 0;
             
             if (audioManager != null)
@@ -716,14 +778,11 @@ public class GameManager : MonoBehaviour
     
     private IEnumerator ShowWinPanelWithDelay()
     {
-        // Play game over sound immediately
         if (audioManager != null)
             audioManager.PlayGameOver();
         
-        // Wait for the specified delay
         yield return new WaitForSeconds(winPanelDelay);
         
-        // Show the win panel
         if (winPanel != null)
         {
             winPanel.SetActive(true);
@@ -744,15 +803,17 @@ public class GameManager : MonoBehaviour
     {
         score = 0;
         moves = 0;
-        clickCount = 0; // Reset click count when starting new game
+        clickCount = 0;
         gameTime = 0f;
         matchedPairs = 0;
         flippedCards.Clear();
         isCheckingMatches = false;
-        
-        // Reset combo variables
+
         comboCount = 0;
         lastMatchMove = -1;
+
+        lastDisplayedSeconds = -1;
+        timerUpdateCount = 0;
 
         UpdateScoreDisplay();
         UpdateMovesDisplay();
@@ -935,7 +996,6 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
-        // Play button click sound
         if (audioManager != null)
             audioManager.PlayButtonClick();
             
@@ -981,6 +1041,14 @@ public class GameManager : MonoBehaviour
         if (!hasFocus && gameActive)
         {
             SaveGame();
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
         }
     }
     
