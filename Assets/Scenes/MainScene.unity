@@ -1002,8 +1002,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278250239
-  m_fontColor: {r: 1, g: 0.9160186, b: 0, a: 1}
+    rgba: 4278255613
+  m_fontColor: {r: 0.9919355, g: 1, b: 0, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -3663,6 +3663,18 @@ PrefabInstance:
     - target: {fileID: 6046604281877125740, guid: 45018b0287102824699482f73bf79d7c, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 6046604281877125743, guid: 45018b0287102824699482f73bf79d7c, type: 3}
+      propertyPath: m_fontColor.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6046604281877125743, guid: 45018b0287102824699482f73bf79d7c, type: 3}
+      propertyPath: m_fontColor.r
+      value: 0.9919355
+      objectReference: {fileID: 0}
+    - target: {fileID: 6046604281877125743, guid: 45018b0287102824699482f73bf79d7c, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4278255613
       objectReference: {fileID: 0}
     - target: {fileID: 6046604281964990514, guid: 45018b0287102824699482f73bf79d7c, type: 3}
       propertyPath: m_AnchorMax.y
