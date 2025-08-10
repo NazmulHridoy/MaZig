@@ -13,6 +13,7 @@ public class HomeManager : MonoBehaviour
     [Header("Main Menu")]
     [SerializeField] private Button continueButton;
     [SerializeField] private Button newGameButton;
+    [SerializeField] private Button settingsButton;
     [SerializeField] private Button quitButton;
     [SerializeField] private GameObject mainMenuPanel;
     
@@ -26,14 +27,27 @@ public class HomeManager : MonoBehaviour
     [Header("Theme Settings")]
     [SerializeField] private SpriteTheme[] availableThemes;
     
+    [Header("Settings Panel")]
+    [SerializeField] private GameObject settingsPanel;
+    [SerializeField] private Button settingsBackButton;
+    [SerializeField] private Slider masterVolumeSlider;
+    [SerializeField] private Slider sfxVolumeSlider;
+    [SerializeField] private Slider musicVolumeSlider;
+    [SerializeField] private TextMeshProUGUI masterVolumeText;
+    [SerializeField] private TextMeshProUGUI sfxVolumeText;
+    [SerializeField] private TextMeshProUGUI musicVolumeText;
+    
     private SaveSystem saveSystem;
+    private AudioManager audioManager;
     
     private void Start()
     {
         saveSystem = SaveSystem.Instance;
+        audioManager = AudioManager.Instance;
         
         SetupUI();
         SetupDropdowns();
+        SetupSettingsPanel();
         CheckForSaveData();
     }
     
@@ -45,6 +59,9 @@ public class HomeManager : MonoBehaviour
         if (newGameButton != null)
             newGameButton.onClick.AddListener(OnNewGameClicked);
             
+        if (settingsButton != null)
+            settingsButton.onClick.AddListener(OnSettingsClicked);
+            
         if (quitButton != null)
             quitButton.onClick.AddListener(OnQuitClicked);
         
@@ -53,9 +70,15 @@ public class HomeManager : MonoBehaviour
             
         if (backButton != null)
             backButton.onClick.AddListener(OnBackClicked);
+            
+        if (settingsBackButton != null)
+            settingsBackButton.onClick.AddListener(OnSettingsBackClicked);
 
         if (newGamePanel != null)
             newGamePanel.SetActive(false);
+            
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
     }
     
     private void SetupDropdowns()
@@ -198,6 +221,94 @@ public class HomeManager : MonoBehaviour
         #endif
     }
     
+    private void OnSettingsClicked()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(false);
+            
+        if (settingsPanel != null)
+            settingsPanel.SetActive(true);
+    }
+    
+    private void OnSettingsBackClicked()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
+        if (settingsPanel != null)
+            settingsPanel.SetActive(false);
+            
+        if (mainMenuPanel != null)
+            mainMenuPanel.SetActive(true);
+    }
+    
+    private void SetupSettingsPanel()
+    {
+        if (audioManager != null)
+        {
+            if (masterVolumeSlider != null)
+            {
+                masterVolumeSlider.value = audioManager.MasterVolume;
+                masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+                UpdateVolumeText(masterVolumeText, audioManager.MasterVolume);
+            }
+            
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.value = audioManager.EffectsVolume;
+                sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+                UpdateVolumeText(sfxVolumeText, audioManager.EffectsVolume);
+            }
+            
+            if (musicVolumeSlider != null)
+            {
+                musicVolumeSlider.value = audioManager.MusicVolume;
+                musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+                UpdateVolumeText(musicVolumeText, audioManager.MusicVolume);
+            }
+        }
+    }
+    
+    private void OnMasterVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetMasterVolume(value);
+            UpdateVolumeText(masterVolumeText, value);           
+            audioManager.PlayButtonClick();
+        }
+    }
+    
+    private void OnSFXVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetEffectsVolume(value);
+            UpdateVolumeText(sfxVolumeText, value);
+            audioManager.PlayButtonClick();
+        }
+    }
+    
+    private void OnMusicVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetMusicVolume(value);
+            UpdateVolumeText(musicVolumeText, value);
+        }
+    }
+    
+    private void UpdateVolumeText(TextMeshProUGUI text, float value)
+    {
+        if (text != null)
+        {
+            text.text = Mathf.RoundToInt(value * 100) + "%";
+        }
+    }
+    
     private void OnDestroy()
     {
         if (gridSizeDropdown != null)
@@ -205,5 +316,14 @@ public class HomeManager : MonoBehaviour
             
         if (themeDropdown != null)
             themeDropdown.onValueChanged.RemoveListener(OnDropdownValueChanged);
+            
+        if (masterVolumeSlider != null)
+            masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
+            
+        if (sfxVolumeSlider != null)
+            sfxVolumeSlider.onValueChanged.RemoveListener(OnSFXVolumeChanged);
+            
+        if (musicVolumeSlider != null)
+            musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
     }
 }

@@ -200,7 +200,12 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (gameActive)
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+        {
+            TogglePause();
+        }
+        
+        if (gameActive && !isPaused)
         {
             gameTime += Time.deltaTime;
             
@@ -676,7 +681,7 @@ public class GameManager : MonoBehaviour
 
     public void CardClicked(Card clickedCard)
     {
-        if (!gameActive || clickedCard.IsFlipped || clickedCard.IsMatched)
+        if (!gameActive || clickedCard.IsFlipped || clickedCard.IsMatched || isPaused)
             return;
 
         clickedCard.Flip();
@@ -1044,13 +1049,6 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    private void OnDestroy()
-    {
-        if (Instance == this)
-        {
-            Instance = null;
-        }
-    }
     
     private void ShowComboFeedback(int combo)
     {
@@ -1124,5 +1122,132 @@ public class GameManager : MonoBehaviour
         
         comboCanvasGroup.alpha = 0f;
         comboDisplayCoroutine = null;
+    }
+    
+    private void InitializePauseMenu()
+    {
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
+        
+        if (pauseButton != null)
+        {
+            pauseButton.onClick.AddListener(TogglePause);
+        }
+        
+        if (audioManager != null)
+        {
+            if (masterVolumeSlider != null)
+            {
+                masterVolumeSlider.value = audioManager.MasterVolume;
+                masterVolumeSlider.onValueChanged.AddListener(OnMasterVolumeChanged);
+                UpdateVolumeText(masterVolumeText, audioManager.MasterVolume);
+            }
+            
+            if (sfxVolumeSlider != null)
+            {
+                sfxVolumeSlider.value = audioManager.EffectsVolume;
+                sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+                UpdateVolumeText(sfxVolumeText, audioManager.EffectsVolume);
+            }
+            
+            if (musicVolumeSlider != null)
+            {
+                musicVolumeSlider.value = audioManager.MusicVolume;
+                musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+                UpdateVolumeText(musicVolumeText, audioManager.MusicVolume);
+            }
+        }
+    }
+    
+    public void TogglePause()
+    {
+        if (!gameActive || winPanel.activeSelf)
+            return;
+            
+        isPaused = !isPaused;
+        
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(isPaused);
+        }
+        
+        Time.timeScale = isPaused ? 0f : 1f;
+        
+        if (audioManager != null)
+        {
+            if (isPaused)
+                audioManager.PauseBackgroundMusic();
+            else
+                audioManager.ResumeBackgroundMusic();
+        }
+        if (audioManager != null)
+            audioManager.PlayButtonClick();
+    }
+    
+    public void ResumePause()
+    {
+        if (isPaused)
+            TogglePause();
+    }
+    
+    private void OnMasterVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetMasterVolume(value);
+            UpdateVolumeText(masterVolumeText, value);
+            audioManager.PlayButtonClick();
+        }
+    }
+    
+    private void OnSFXVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetEffectsVolume(value);
+            UpdateVolumeText(sfxVolumeText, value);
+            audioManager.PlayButtonClick();
+        }
+    }
+    
+    private void OnMusicVolumeChanged(float value)
+    {
+        if (audioManager != null)
+        {
+            audioManager.SetMusicVolume(value);
+            UpdateVolumeText(musicVolumeText, value);
+        }
+    }
+    
+    private void UpdateVolumeText(TextMeshProUGUI text, float value)
+    {
+        if (text != null)
+        {
+            text.text = Mathf.RoundToInt(value * 100) + "%";
+        }
+    }
+    
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+        
+        if (pauseButton != null)
+            pauseButton.onClick.RemoveListener(TogglePause);
+            
+        if (masterVolumeSlider != null)
+            masterVolumeSlider.onValueChanged.RemoveListener(OnMasterVolumeChanged);
+            
+        if (sfxVolumeSlider != null)
+            sfxVolumeSlider.onValueChanged.RemoveListener(OnSFXVolumeChanged);
+            
+        if (musicVolumeSlider != null)
+            musicVolumeSlider.onValueChanged.RemoveListener(OnMusicVolumeChanged);
+            
+        Time.timeScale = 1f;
     }
 }

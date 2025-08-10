@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AudioManager : MonoBehaviour
 {
@@ -18,11 +19,18 @@ public class AudioManager : MonoBehaviour
     [Header("Background Music")]
     [SerializeField] private AudioClip backgroundMusic;
 
-    [Header("Settings")]
+    [Header("Volume Settings")]
+    [Range(0f, 1f)]
+    [SerializeField] private float masterVolume = 1f;
     [Range(0f, 1f)]
     [SerializeField] private float effectsVolume = 1f;
     [Range(0f, 1f)]
     [SerializeField] private float musicVolume = 0.5f;
+    
+    // Properties for external access
+    public float MasterVolume => masterVolume;
+    public float EffectsVolume => effectsVolume;
+    public float MusicVolume => musicVolume;
 
     private void Awake()
     {
@@ -57,8 +65,7 @@ public class AudioManager : MonoBehaviour
             musicSource.loop = true;
         }
 
-        effectsSource.volume = effectsVolume;
-        musicSource.volume = musicVolume;
+        UpdateVolumes();
     }
 
     public void PlayCardFlip() => PlaySound(cardFlipSound);
@@ -109,33 +116,68 @@ public class AudioManager : MonoBehaviour
         }
     }
 
+    public void SetMasterVolume(float volume)
+    {
+        masterVolume = Mathf.Clamp01(volume);
+        UpdateVolumes();
+        PlayerPrefs.SetFloat("MasterVolume", masterVolume);
+        PlayerPrefs.Save();
+    }
+
     public void SetEffectsVolume(float volume)
     {
         effectsVolume = Mathf.Clamp01(volume);
-        if (effectsSource != null)
-            effectsSource.volume = effectsVolume;
-
+        UpdateVolumes();
         PlayerPrefs.SetFloat("EffectsVolume", effectsVolume);
+        PlayerPrefs.Save();
     }
 
     public void SetMusicVolume(float volume)
     {
         musicVolume = Mathf.Clamp01(volume);
-        if (musicSource != null)
-            musicSource.volume = musicVolume;
-
+        UpdateVolumes();
         PlayerPrefs.SetFloat("MusicVolume", musicVolume);
+        PlayerPrefs.Save();
+    }
+    
+    private void UpdateVolumes()
+    {
+        if (effectsSource != null)
+            effectsSource.volume = effectsVolume * masterVolume;
+        
+        if (musicSource != null)
+            musicSource.volume = musicVolume * masterVolume;
     }
 
     private void Start()
     {
+        // Load saved volume settings
+        masterVolume = PlayerPrefs.GetFloat("MasterVolume", 1f);
         effectsVolume = PlayerPrefs.GetFloat("EffectsVolume", 1f);
         musicVolume = PlayerPrefs.GetFloat("MusicVolume", 0.5f);
 
-        SetEffectsVolume(effectsVolume);
-        SetMusicVolume(musicVolume);
+        UpdateVolumes();
         
         // Start background music automatically
         PlayBackgroundMusic();
+    }
+    
+    // Methods for UI sliders
+    public void OnMasterVolumeChanged(Slider slider)
+    {
+        if (slider != null)
+            SetMasterVolume(slider.value);
+    }
+    
+    public void OnEffectsVolumeChanged(Slider slider)
+    {
+        if (slider != null)
+            SetEffectsVolume(slider.value);
+    }
+    
+    public void OnMusicVolumeChanged(Slider slider)
+    {
+        if (slider != null)
+            SetMusicVolume(slider.value);
     }
 }
