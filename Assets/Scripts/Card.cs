@@ -23,6 +23,8 @@ public class Card : MonoBehaviour, IPointerClickHandler
     private bool isMatched = false;
     private bool isAnimating = false;
     private float flipDuration = 0.3f;
+    
+    private GameManager gameManager;
 
     public int CardValue => cardValue; 
     public bool IsFlipped => isFlipped;
@@ -95,9 +97,17 @@ public class Card : MonoBehaviour, IPointerClickHandler
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (!isAnimating && !isMatched && GameManager.Instance != null)
+        if (!isAnimating && !isMatched)
         {
-            GameManager.Instance.CardClicked(this);
+            if (gameManager == null)
+            {
+                gameManager = FindObjectOfType<GameManager>();
+            }
+            
+            if (gameManager != null)
+            {
+                gameManager.CardClicked(this);
+            }
         }
     }
 

@@ -10,8 +10,6 @@ using System.Linq;
 /// </summary>
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance;
-
     [Header("Game Settings")]
     [SerializeField] private GameSettings gameSettings;
     [SerializeField] private GridLayoutSettings gridLayoutSettings;
@@ -63,25 +61,13 @@ public class GameManager : MonoBehaviour
     private SaveSystem saveSystem;
     private AudioManager audioManager;
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-    }
-
     private void Start()
-    {
-        saveSystem = GetComponent<SaveSystem>();
+    {       
+        saveSystem = SaveSystem.Instance;
         audioManager = AudioManager.Instance;
         
-        SetupLayoutDropdown();
-        SetupThemeDropdown();
+        // SetupLayoutDropdown();
+        // SetupThemeDropdown();
 
         StartCoroutine(DelayedStart());
     }
@@ -120,9 +106,8 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // Check if we should load save or start new game based on home scene preferences
         bool shouldLoadSave = PlayerPrefs.GetInt("LoadSaveOnStart", 0) == 1;
-        PlayerPrefs.DeleteKey("LoadSaveOnStart"); // Clear after reading
+        PlayerPrefs.DeleteKey("LoadSaveOnStart");
         
         if (shouldLoadSave && saveSystem.HasSaveData())
         {
@@ -130,13 +115,31 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Get game preferences from home scene
             currentRows = PlayerPrefs.GetInt("SelectedRows", 2);
             currentColumns = PlayerPrefs.GetInt("SelectedColumns", 2);
             currentThemeIndex = PlayerPrefs.GetInt("SelectedTheme", 0);
             
-            // Update dropdowns to match selected values
-            UpdateDropdownsToSelection();
+            Debug.Log($"GameManager: Starting NEW game with rows={currentRows}, cols={currentColumns}, theme={currentThemeIndex}");
+
+            PlayerPrefs.DeleteKey("SelectedRows");
+            PlayerPrefs.DeleteKey("SelectedColumns");
+            PlayerPrefs.DeleteKey("SelectedTheme");
+            
+            if (currentThemeIndex >= 0 && currentThemeIndex < availableThemes.Length)
+            {
+                SetCurrentTheme(currentThemeIndex);
+                Debug.Log($"GameManager NEW: Applied theme {currentThemeIndex} - {availableThemes[currentThemeIndex].themeName}");
+            }
+            else
+            {
+                Debug.LogError($"GameManager NEW: Invalid theme index {currentThemeIndex}, defaulting to 0");
+                currentThemeIndex = 0;
+                if (availableThemes != null && availableThemes.Length > 0)
+                {
+                    SetCurrentTheme(currentThemeIndex);
+                }
+            }
+            // UpdateDropdownsToSelection();
             
             StartNewGame();
         }
@@ -151,6 +154,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /*
     private void SetupLayoutDropdown()
     {
         if (layoutDropdown != null)
@@ -185,7 +189,9 @@ public class GameManager : MonoBehaviour
             StartNewGame();
         }
     }
+    */
     
+    /*
     private void SetupThemeDropdown()
     {
         if (themeDropdown != null && availableThemes != null && availableThemes.Length > 0)
@@ -225,6 +231,7 @@ public class GameManager : MonoBehaviour
             StartNewGame();
         }
     }
+    */
     
     private void SetCurrentTheme(int index)
     {
@@ -239,6 +246,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    /*
     private void UpdateDropdownsToSelection()
     {
         // Update layout dropdown
@@ -262,6 +270,7 @@ public class GameManager : MonoBehaviour
             SetCurrentTheme(currentThemeIndex);
         }
     }
+    */
     
     private Sprite GetCardFaceSprite(int cardValue)
     {
@@ -270,11 +279,21 @@ public class GameManager : MonoBehaviour
             var currentTheme = availableThemes[currentThemeIndex];
             if (currentTheme != null && currentTheme.IsValid())
             {
+                Debug.Log($"Using theme sprite for card value {cardValue}, theme has {currentTheme.cardFaces.Length} sprites");
                 return cardValue < currentTheme.cardFaces.Length ? currentTheme.cardFaces[cardValue] : currentTheme.cardBack; // Have to change this later if time
             }
+            else
+            {
+                Debug.LogWarning($"Theme at index {currentThemeIndex} is null or invalid");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"AvailableThemes is null or currentThemeIndex {currentThemeIndex} is out of bounds");
         }
         
         // Fallback to legacy sprite array
+        Debug.Log($"Using legacy sprites for card value {cardValue}");
         return cardValue < cardFaces.Length ? cardFaces[cardValue] : cardBack;
     }
     
@@ -288,8 +307,6 @@ public class GameManager : MonoBehaviour
                 return currentTheme.cardBack;
             }
         }
-        
-        // Fallback to legacy back sprite
         return cardBack;
     }
     
@@ -330,7 +347,25 @@ public class GameManager : MonoBehaviour
     }
 
     private void SetupBoard()
-    {
+    {        
+        if (cardPrefab == null)
+        {
+            Debug.LogError("Card prefab is null!");
+            return;
+        }
+        
+        if (cardContainer == null)
+        {
+            Debug.LogError("Card container is null!");
+            return;
+        }
+        
+        if (playArea == null)
+        {
+            Debug.LogError("Play area is null!");
+            return;
+        }
+        
         totalPairs = (currentRows * currentColumns) / 2;
 
         int maxUniqueSprites = GetMaxAvailableSprites();
@@ -350,7 +385,6 @@ public class GameManager : MonoBehaviour
 
         CalculateCardLayout();
 
-        // Create and position each card in the grid
         int cardIndex = 0;
         for (int row = 0; row < currentRows; row++)
         {
@@ -405,6 +439,17 @@ public class GameManager : MonoBehaviour
             cardFlipDuration = gridLayoutSettings.defaultFlipDuration;
             previewDuration = gridLayoutSettings.defaultPreviewDuration;
         }
+        else
+        {
+            Debug.LogWarning("GridLayoutSettings is null! Using fallback values.");
+            cardSpacing = 10f;
+            calculatedCardSize = 100f;
+            
+            float cardWidth = (areaWidth - (currentColumns - 1) * cardSpacing) / currentColumns;
+            float cardHeight = (areaHeight - (currentRows - 1) * cardSpacing) / currentRows;
+            calculatedCardSize = Mathf.Min(cardWidth, cardHeight) * 0.9f; // 90% to add some padding
+            calculatedCardSize = Mathf.Clamp(calculatedCardSize, 30f, 250f);
+        }
 
         Debug.Log($"Grid: {currentRows}x{currentColumns}, CardSize: {calculatedCardSize}, Spacing: {cardSpacing}");
         Debug.Log($"Padding: H={currentGridPreset?.horizontalPadding ?? 0}px, V={currentGridPreset?.verticalPadding ?? 0}px");
@@ -447,6 +492,8 @@ public class GameManager : MonoBehaviour
 
     private void CreateCard(int row, int col, int cardValue)
     {
+        Debug.Log($"Creating card at row={row}, col={col}, value={cardValue}");
+        
         GameObject newCard = Instantiate(cardPrefab, cardContainer);
         Card cardComponent = newCard.GetComponent<Card>();
         
@@ -477,6 +524,12 @@ public class GameManager : MonoBehaviour
             
             cardComponent.Initialize(cardValue, cardFace, cardBackSprite, cardFlipDuration);
             allCards.Add(cardComponent);
+            
+            Debug.Log($"Card created at position {rectTransform.anchoredPosition}, size: {calculatedCardSize}");
+        }
+        else
+        {
+            Debug.LogError("Card component not found on instantiated prefab!");
         }
     }
 
@@ -684,8 +737,15 @@ public class GameManager : MonoBehaviour
                 totalPairs = totalPairs,
                 rows = currentRows,
                 columns = currentColumns,
+                themeIndex = currentThemeIndex,
                 cardStates = new List<CardState>()
             };
+
+            Debug.Log($"SaveGame: Saving theme index {currentThemeIndex}");
+            if (availableThemes != null && currentThemeIndex < availableThemes.Length)
+            {
+                Debug.Log($"SaveGame: Theme name is {availableThemes[currentThemeIndex].themeName}");
+            }
 
             foreach (Card card in allCards)
             {
@@ -710,19 +770,41 @@ public class GameManager : MonoBehaviour
             {
                 currentRows = data.rows;
                 currentColumns = data.columns;
+                
+                currentThemeIndex = data.themeIndex;
+                if (currentThemeIndex < 0 || currentThemeIndex >= availableThemes.Length)
+                {
+                    Debug.LogWarning($"LoadGame: Invalid theme index {currentThemeIndex}, defaulting to 0");
+                    currentThemeIndex = 0;
+                }
+                
                 score = data.score;
                 moves = data.moves;
                 gameTime = data.gameTime;
                 matchedPairs = data.matchedPairs;
                 totalPairs = data.totalPairs;
+                
+                Debug.Log($"LoadGame: Restored theme index {currentThemeIndex}");
 
                 ClearBoard();
+                
+                if (currentThemeIndex >= 0 && currentThemeIndex < availableThemes.Length)
+                {
+                    SetCurrentTheme(currentThemeIndex);
+                    Debug.Log($"LoadGame: Applied theme {currentThemeIndex} - {availableThemes[currentThemeIndex].themeName}");
+                }
+                else
+                {
+                    Debug.LogError($"LoadGame: Invalid theme index {currentThemeIndex}, available themes: {availableThemes?.Length ?? 0}");
+                }
+                
                 RestoreBoard(data.cardStates);
                 
                 UpdateScoreDisplay();
                 UpdateMovesDisplay();
                 UpdateTimerDisplay();
-                
+
+                /*
                 if (layoutDropdown != null)
                 {
                     string loadedLayout = $"{currentRows}x{currentColumns}";
@@ -735,6 +817,7 @@ public class GameManager : MonoBehaviour
                         }
                     }
                 }
+                */
 
                 gameActive = false;
                 StartCoroutine(ShowLoadedGamePreview());
@@ -748,6 +831,8 @@ public class GameManager : MonoBehaviour
 
     private void RestoreBoard(List<CardState> cardStates)
     {
+        Debug.Log($"RestoreBoard: Restoring {cardStates.Count} cards with theme {currentThemeIndex}");
+        
         CalculateCardLayout();
         int index = 0;
         for (int row = 0; row < currentRows; row++)
@@ -784,12 +869,19 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
+        // Play button click sound
+        if (audioManager != null)
+            audioManager.PlayButtonClick();
+            
         ClearSaveData();
         StartNewGame();
     }
 
     public void QuitGame()
     {
+        if (audioManager != null)
+            audioManager.PlayButtonClick();
+            
         SaveGame();
         #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
@@ -800,9 +892,12 @@ public class GameManager : MonoBehaviour
     
     public void ReturnToHome()
     {
+        if (audioManager != null)
+            audioManager.PlayButtonClick();
+            
         if (gameActive)
         {
-            SaveGame(); // Auto-save current game
+            SaveGame();
         }
         SceneController.LoadHomeScene();
     }

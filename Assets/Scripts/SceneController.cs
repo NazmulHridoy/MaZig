@@ -17,6 +17,7 @@ public static class SceneController
     public static void LoadGameScene(bool loadSave = false)
     {
         PlayerPrefs.SetInt("LoadSaveOnStart", loadSave ? 1 : 0);
+        Debug.Log($"SceneController: Loading {MAIN_SCENE} with loadSave={loadSave}");
         SceneManager.LoadScene(MAIN_SCENE);
     }
     

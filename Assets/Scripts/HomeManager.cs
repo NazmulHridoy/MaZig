@@ -30,12 +30,7 @@ public class HomeManager : MonoBehaviour
     
     private void Start()
     {
-        saveSystem = GetComponent<SaveSystem>();
-        if (saveSystem == null)
-        {
-            GameObject saveSystemObj = new GameObject("SaveSystem");
-            saveSystem = saveSystemObj.AddComponent<SaveSystem>();
-        }
+        saveSystem = SaveSystem.Instance;
         
         SetupUI();
         SetupDropdowns();
@@ -77,6 +72,8 @@ public class HomeManager : MonoBehaviour
             int defaultIndex = gridOptions.IndexOf("2x2");
             if (defaultIndex >= 0)
                 gridSizeDropdown.value = defaultIndex;
+                
+            gridSizeDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         }
         
         if (themeDropdown != null && availableThemes != null && availableThemes.Length > 0)
@@ -94,7 +91,15 @@ public class HomeManager : MonoBehaviour
             
             themeDropdown.AddOptions(themeOptions);
             themeDropdown.value = 0;
+            
+            themeDropdown.onValueChanged.AddListener(OnDropdownValueChanged);
         }
+    }
+    
+    private void OnDropdownValueChanged(int value)
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
     }
     
     private void CheckForSaveData()
@@ -107,12 +112,18 @@ public class HomeManager : MonoBehaviour
     
     private void OnContinueClicked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
         PlayerPrefs.SetInt("LoadSaveOnStart", 1);
         SceneManager.LoadScene("MainScene");
     }
     
     private void OnNewGameClicked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
         if (mainMenuPanel != null)
             mainMenuPanel.SetActive(false);
             
@@ -122,6 +133,9 @@ public class HomeManager : MonoBehaviour
     
     private void OnStartGameClicked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
         string gridSize = gridSizeDropdown.options[gridSizeDropdown.value].text;
         string[] dimensions = gridSize.Split('x');
         
@@ -134,16 +148,37 @@ public class HomeManager : MonoBehaviour
             PlayerPrefs.SetInt("SelectedColumns", cols);
             PlayerPrefs.SetInt("SelectedTheme", themeDropdown.value);
             PlayerPrefs.SetInt("LoadSaveOnStart", 0);
+            PlayerPrefs.Save();
+            
+            Debug.Log($"HomeManager: Starting game with rows={rows}, cols={cols}, theme={themeDropdown.value}");
             
             if (saveSystem != null)
                 saveSystem.DeleteSave();
-            
-            SceneManager.LoadScene("MainScene");
+
+            StartCoroutine(LoadMainScene());
         }
+    }
+    
+    private IEnumerator LoadMainScene()
+    {
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("MainScene");
+        
+        asyncLoad.allowSceneActivation = true;
+        
+        while (!asyncLoad.isDone)
+        {
+            Debug.Log($"Loading progress: {asyncLoad.progress * 100}%");
+            yield return null;
+        }
+        
+        Debug.Log("MainScene loaded successfully!");
     }
     
     private void OnBackClicked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
         if (newGamePanel != null)
             newGamePanel.SetActive(false);
             
@@ -153,10 +188,22 @@ public class HomeManager : MonoBehaviour
     
     private void OnQuitClicked()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+            
         #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
         #else
             Application.Quit();
         #endif
+    }
+    
+    private void OnDestroy()
+    {
+        if (gridSizeDropdown != null)
+            gridSizeDropdown.onValueChanged.RemoveListener(OnDropdownValueChanged);
+            
+        if (themeDropdown != null)
+            themeDropdown.onValueChanged.RemoveListener(OnDropdownValueChanged);
     }
 }

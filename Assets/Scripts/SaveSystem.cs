@@ -21,13 +21,46 @@ public class GameData
     public int totalPairs;
     public int rows;
     public int columns;
+    public int themeIndex;
     public List<CardState> cardStates;
     public string saveDate;
 }
 
 public class SaveSystem : MonoBehaviour
 {
+    private static SaveSystem instance;
     private const string SAVE_KEY = "MatchCardGameSave";
+    
+    public static SaveSystem Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<SaveSystem>();
+                if (instance == null)
+                {
+                    GameObject go = new GameObject("SaveSystem");
+                    instance = go.AddComponent<SaveSystem>();
+                    DontDestroyOnLoad(go);
+                }
+            }
+            return instance;
+        }
+    }
+    
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
 
     public void SaveGame(GameData gameData)
     {

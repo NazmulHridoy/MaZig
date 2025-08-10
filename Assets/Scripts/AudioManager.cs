@@ -13,6 +13,10 @@ public class AudioManager : MonoBehaviour
     [SerializeField] private AudioClip matchSound;
     [SerializeField] private AudioClip mismatchSound;
     [SerializeField] private AudioClip gameOverSound;
+    [SerializeField] private AudioClip buttonClickSound;
+    
+    [Header("Background Music")]
+    [SerializeField] private AudioClip backgroundMusic;
 
     [Header("Settings")]
     [Range(0f, 1f)]
@@ -25,6 +29,7 @@ public class AudioManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
             InitializeAudioSources();
         }
         else
@@ -60,12 +65,47 @@ public class AudioManager : MonoBehaviour
     public void PlayMatch() => PlaySound(matchSound);
     public void PlayMismatch() => PlaySound(mismatchSound);
     public void PlayGameOver() => PlaySound(gameOverSound);
+    public void PlayButtonClick() => PlaySound(buttonClickSound);
 
     private void PlaySound(AudioClip clip)
     {
         if (clip != null && effectsSource != null)
         {
             effectsSource.PlayOneShot(clip, effectsVolume);
+        }
+    }
+    
+    public void PlayBackgroundMusic()
+    {
+        if (backgroundMusic != null && musicSource != null)
+        {
+            musicSource.clip = backgroundMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
+    }
+    
+    public void StopBackgroundMusic()
+    {
+        if (musicSource != null)
+        {
+            musicSource.Stop();
+        }
+    }
+    
+    public void PauseBackgroundMusic()
+    {
+        if (musicSource != null)
+        {
+            musicSource.Pause();
+        }
+    }
+    
+    public void ResumeBackgroundMusic()
+    {
+        if (musicSource != null)
+        {
+            musicSource.UnPause();
         }
     }
 
@@ -94,5 +134,8 @@ public class AudioManager : MonoBehaviour
 
         SetEffectsVolume(effectsVolume);
         SetMusicVolume(musicVolume);
+        
+        // Start background music automatically
+        PlayBackgroundMusic();
     }
 }
